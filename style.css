@@ -1,0 +1,90 @@
+*{box-sizing:border-box;font-family:Inter,Arial}
+body{margin:0;background:#f4f6f9}
+
+.login-bg{
+  display:flex;align-items:center;justify-content:center;
+  height:100vh;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+}
+
+.login-card{
+  background:#fff;padding:40px;border-radius:14px;
+  width:340px;text-align:center;
+  box-shadow:0 25px 50px rgba(0,0,0,.3)
+}
+
+.login-card input{
+  width:100%;padding:12px;margin:10px 0;
+  border-radius:8px;border:1px solid #ccc
+}
+
+.login-card button{
+  width:100%;padding:12px;
+  background:#2563eb;color:#fff;
+  border:none;border-radius:8px;font-weight:600
+}
+
+.error{color:#e11d48}
+
+.topbar{
+  background:#111;color:#fff;
+  padding:14px 24px;
+  display:flex;justify-content:space-between
+}
+
+.filter-card{
+  background:#fff;margin:20px;padding:20px;
+  border-radius:12px;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:20px
+}
+
+.field label{font-weight:600;margin-bottom:6px;display:block}
+
+.checkbox-row label{margin-right:12px}
+
+.primary{
+  background:#2563eb;color:#fff;border:none;
+  padding:12px;border-radius:8px
+}
+
+.result-table{
+  width:95%;margin:20px;border-collapse:collapse;background:#fff
+}
+
+.result-table th,.result-table td{
+  border:1px solid #ddd;padding:10px;text-align:center
+}
+
+.costing-bg{display:flex;justify-content:center;padding:30px}
+
+.cost-card{
+  background:#fff9cc;padding:25px;width:650px;
+  border-radius:12px
+}
+
+.cost-table td{border:1px solid #999;padding:10px}
+
+.cost-table .total td{
+  background:#b6d7a8;font-weight:bold
+}
+
+.edit-box{display:none;margin-top:10px}
+
+footer{text-align:center;color:#666;padding:10px}
+
+.loader{
+  width:50px;height:50px;
+  border:5px solid #e5e7eb;
+  border-top:5px solid #2563eb;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:40px auto;
+}
+
+.hidden{display:none}
+
+@keyframes spin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}

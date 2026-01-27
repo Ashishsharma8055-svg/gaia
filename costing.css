@@ -1,0 +1,162 @@
+/* ================================
+   COSTING PAGE ONLY
+================================ */
+
+.costing-bg{
+  display:flex;
+  justify-content:center;
+  padding:30px;
+  background:#f4f6f9;
+}
+
+.cost-card{
+  background:#fff9cc;
+  padding:25px;
+  width:750px;
+  border-radius:12px;
+  border:2px solid #000;
+}
+
+/* HEADER */
+.cost-card h2{
+  text-align:center;
+  margin:0 0 20px;
+  font-weight:700;
+  border-bottom:3px solid #000;
+  padding-bottom:8px;
+}
+
+/* META INFO */
+.meta{
+  display:flex;
+  justify-content:space-between;
+  font-weight:600;
+  margin-bottom:10px;
+}
+
+/* ================================
+   FIRST COST TABLE (JUSTIFIED)
+================================ */
+
+.cost-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:20px;
+  background:#fffde6;
+}
+
+.cost-table th,
+.cost-table td{
+  border:1px solid #000;
+  padding:10px;
+  font-size:14px;
+}
+
+/* Header row */
+.cost-table th{
+  background:#fff2cc;
+  text-align:center;
+}
+
+/* Description column */
+.cost-table td:first-child{
+  text-align:left;
+  width:50%;
+}
+
+/* Rate column */
+.cost-table td:nth-child(2){
+  text-align:center;
+  width:20%;
+}
+
+/* Amount column */
+.cost-table td:nth-child(3){
+  text-align:right;
+  width:30%;
+  font-weight:600;
+}
+
+/* TOTAL ROW */
+.cost-table .total td{
+  background:#b6d7a8;
+  font-weight:700;
+  font-size:15px;
+}
+
+/* ================================
+   PAYMENT SCHEDULE TABLE
+================================ */
+
+.cost-table + h3{
+  margin-top:30px;
+}
+
+.cost-table tr td:nth-child(2){
+  text-align:center;
+}
+
+.cost-table tr td:nth-child(3){
+  text-align:right;
+}
+
+/* ================================
+   ACTION BUTTONS
+================================ */
+
+.actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:15px;
+}
+
+.actions button{
+  padding:10px 16px;
+  border-radius:6px;
+  border:1px solid #444;
+  background:#eee;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.actions button:hover{
+  background:#ddd;
+}
+
+/* ================================
+   EDIT BOX
+================================ */
+
+.edit-box{
+  margin-top:15px;
+  padding:10px;
+  background:#fff;
+  border:1px dashed #444;
+  display:flex;
+  gap:10px;
+}
+
+.edit-box input{
+  padding:8px;
+  width:160px;
+}
+
+.edit-box button{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+}
+
+/* ================================
+   FOOT NOTE
+================================ */
+
+.note{
+  margin-top:10px;
+  font-size:13px;
+  text-align:center;
+  font-weight:600;
+}

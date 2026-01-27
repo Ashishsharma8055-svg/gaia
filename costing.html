@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Costing Sheet</title>
+
+<link rel="stylesheet" href="costing.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="costing.js" defer></script>
+</head>
+
+<body class="costing-bg">
+
+<div id="costingSheet" class="cost-card">
+
+  <h2>For Reference: BPTP Verti & Gaia Residences</h2>
+
+  <!-- META -->
+  <div class="meta">
+    <div>Unit No: <b id="unitNo"></b></div>
+  
+    <div>SIZE: <b id="size"></b> Sq.Ft</div>
+  </div>
+
+  <!-- COST TABLE -->
+  <table class="cost-table">
+    <tr>
+      <th>Description</th>
+      <th>Rate</th>
+      <th>Amount (₹)</th>
+    </tr>
+
+    <tr>
+      <td>Price</td>
+      <td id="rateSqft"></td>
+      <td id="rateValue"></td>
+    </tr>
+
+    <tr>
+      <td>PLC (as applicable)</td>
+      <td id="plcSqft"></td>
+      <td id="plcValue"></td>
+    </tr>
+
+    <tr>
+      <td>GST</td>
+      <td>5%</td>
+      <td id="gstValue"></td>
+    </tr>
+
+    <tr class="total">
+      <td colspan="2"><strong>TOTAL</strong></td>
+      <td id="grandTotal"></td>
+    </tr>
+  </table>
+
+  <!-- PAYMENT SCHEDULE -->
+  <h3>Payment Schedule</h3>
+
+  <table class="cost-table">
+    <tr><th>Stage</th><th>%</th><th>Amount (₹)</th></tr>
+
+    <tr>
+      <td>Booking Amount</td>
+      <td>Fixed</td>
+      <td id="booking"></td>
+    </tr>
+
+    <tr>
+      <td>Within 30 Days (less booking amount)</td>
+      <td>10%</td>
+      <td id="within30"></td>
+    </tr>
+
+    <tr>
+      <td>Within 60 Days</td>
+      <td>10%</td>
+      <td id="within60"></td>
+    </tr>
+
+    <tr>
+      <td>Within 120 Days</td>
+      <td>10%</td>
+      <td id="days120"></td>
+    </tr>
+
+    <tr>
+      <td>On 10th Floor Slab / 2 Years (Whichever is later)</td>
+      <td>10%</td>
+      <td id="slab10"></td>
+    </tr>
+
+    <tr>
+      <td>Super Structure (Top Residential Floor Slab)</td>
+      <td>20%</td>
+      <td id="superStr"></td>
+    </tr>
+
+    <tr>
+      <td>On Application OC</td>
+      <td>25%</td>
+      <td id="appOC"></td>
+    </tr>
+
+    <tr>
+      <td>On Receipt OC</td>
+      <td>10%</td>
+      <td id="recOC"></td>
+    </tr>
+
+    <tr>
+      <td>Offer of Possession + Other Charges</td>
+      <td>5%</td>
+      <td id="possession"></td>
+    </tr>
+
+      <tr class="total">
+      <td>TOTAL</td>
+      <td></td>
+      <td id="finalTotal"></td>
+    </tr>
+
+  </table>
+
+  <p class="note">
+    # IFMS, PRFC, IFRCD and Stamp Duty extra as when demanded
+  </p>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button onclick="editCosting()">Edit Price / PLC</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+    <button onclick="printCosting()">Print</button>
+  </div>
+
+  <!-- EDIT BOX -->
+  <div id="editBox" class="edit-box hidden">
+    <input id="newRate" placeholder="New Price / Sqft">
+    <input id="newPlc" placeholder="New PLC / Sqft">
+    <button onclick="applyEdit()">Submit</button>
+  </div>
+
+</div>
+
+<script>
+/* PDF DOWNLOAD WRAPPER (kept here intentionally) */
+function downloadPDF() {
+  beforeExport();
+  html2pdf().from(document.getElementById("costingSheet"))
+    .save("Costing_Sheet.pdf");
+}
+</script>
+
+</body>
+</html>

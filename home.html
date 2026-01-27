@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inventory Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">Real Estate Inventory</div>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<section class="filter-card">
+
+  <!-- Tower -->
+  <div class="field">
+    <label>Tower</label>
+    <select id="tower">
+      <option value="">Select Tower</option>
+      <option>T2</option><option>T3</option>
+      <option>T4</option><option>T5</option><option>T6</option>
+    </select>
+  </div>
+
+  <!-- Unit Allocation -->
+  <div class="field">
+    <label>Unit Allocation</label>
+    <div class="checkbox-row">
+      <label><input type="checkbox" class="unitChk" value="1"> Unit 1</label>
+      <label><input type="checkbox" class="unitChk" value="2"> Unit 2</label>
+      <label><input type="checkbox" class="unitChk" value="3"> Unit 3</label>
+      <label><input type="checkbox" class="unitChk" value="4"> Unit 4</label>
+    </div>
+  </div>
+
+  <!-- Floor Slider -->
+  <div class="field">
+    <label>Floor Range</label>
+    <input type="range" id="from" min="1" max="46" value="1">
+    <input type="range" id="to" min="1" max="46" value="46">
+    <div class="range-text">
+      <span id="fVal">1</span> – <span id="tVal">46</span>
+    </div>
+  </div>
+
+  <button class="primary" id="searchBtn">Search</button>
+
+</section>
+
+<div id="loader" class="loader hidden"></div>
+<table class="result-table" id="table"></table>
+
+<footer>© Inventory Management System</footer>
+
+</body>
+</html>
