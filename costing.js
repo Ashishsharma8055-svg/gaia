@@ -1,14 +1,18 @@
 /* ================================
-   COSTING PAGE SCRIPT
+   COSTING PAGE SCRIPT (FINAL UX)
 ================================ */
 
-// CONSTANTS
-const BASE_RATE_DEFAULT = 20200;   // ₹ per sqft
+if (!localStorage.getItem("loggedIn")) {
+  window.location.replace("index.html");
+}
+
+/* CONSTANTS */
+const BASE_RATE_DEFAULT = 20200;
 const GST_RATE = 0.05;
-const BOOKING_AMOUNT = 2100000;   // ₹21,00,000
+const BOOKING_AMOUNT = 2100000;
 const EDIT_PASSWORD = "112";
 
-// STATE
+/* STATE */
 let rate = BASE_RATE_DEFAULT;
 let plcRate = 0;
 let area = 0;
@@ -18,105 +22,82 @@ let unitNo = "";
    INIT
 ================================ */
 document.addEventListener("DOMContentLoaded", () => {
+
   const saved = localStorage.getItem("costing");
   if (!saved) {
-    alert("No costing data found");
+    alert("Costing data not found. Please open from Home page.");
     return;
   }
 
   const data = JSON.parse(saved);
 
   unitNo = data.unit;
-  area = Number(data.area || 0);
+  area = Number(data.area) || 0;
+  plcRate = Number(data.plc) || 0;
 
-  // Set static values
   document.getElementById("unitNo").innerText = unitNo;
   document.getElementById("size").innerText = area.toLocaleString();
 
-  // 🔥 FETCH PLC LIVE FROM GOOGLE SHEET
-  fetchPLCFromSheet(unitNo);
+  // 🔒 HIDE EDIT BOX ON LOAD
+  hideEditBox();
+
+  calculateAll();
 });
 
 /* ================================
-   FETCH PLC FROM GOOGLE SHEET
+   MASTER CALCULATION
 ================================ */
-function fetchPLCFromSheet(unitNo) {
-  fetch(API + "?action=getPLC&unit=" + encodeURIComponent(unitNo))
-    .then(res => res.text())
-    .then(txt => {
-      console.log("PLC RAW RESPONSE:", txt);
-      const d = JSON.parse(txt);
+function calculateAll() {
 
-      if (d.success) {
-        plcRate = Number(d.plc || 0);
-      } else {
-        plcRate = 0;
-      }
-
-      calculate(); // calculate AFTER PLC arrives
-    })
-    .catch(err => {
-      console.error("PLC FETCH ERROR:", err);
-      plcRate = 0;
-      calculate();
-    });
-}
-
-/* ================================
-   MAIN CALCULATION
-================================ */
-function calculate() {
-  const rateValue = rate * area;
+  const baseValue = rate * area;
   const plcValue  = plcRate * area;
-  const subTotal  = rateValue + plcValue;
-  const gst       = subTotal * GST_RATE;
-  const total     = subTotal + gst;
+  const subTotal  = baseValue + plcValue;
+  const gstValue  = subTotal * GST_RATE;
+  const total     = subTotal + gstValue;
 
-  // Rate section
   set("rateSqft", rate);
-  set("rateValue", rateValue);
+  set("rateValue", baseValue);
 
   set("plcSqft", plcRate);
   set("plcValue", plcValue);
 
-  set("gstValue", gst);
+  set("gstValue", gstValue);
   set("grandTotal", total);
 
-  // Payment schedule
-  calculateSchedule(total);
+  calculateSchedule(subTotal, gstValue, total);
 }
 
 /* ================================
    PAYMENT SCHEDULE
 ================================ */
-function calculateSchedule(total) {
+function calculateSchedule(subTotal, gst, total) {
 
   set("booking", BOOKING_AMOUNT);
 
-  // Within 30 Days
-  const within30 = (total * 0.10) - BOOKING_AMOUNT;
-  set("within30", within30);
+  const tenPercent = subTotal * 0.10;
+  const within30 = (tenPercent + (tenPercent * GST_RATE)) - BOOKING_AMOUNT;
 
+  set("within30", within30);
   set("within60", total * 0.10);
-  set("days120",  total * 0.10);
-  set("slab10",   total * 0.10);
+  set("days120", total * 0.10);
+  set("slab10", total * 0.10);
   set("superStr", total * 0.20);
-  set("appOC",    total * 0.25);
-  set("recOC",    total * 0.10);
+  set("appOC", total * 0.25);
+  set("recOC", total * 0.10);
   set("possession", total * 0.05);
   set("finalTotal", total);
 }
 
 /* ================================
-   EDIT FLOW
+   EDIT FLOW (FIXED UX)
 ================================ */
 function editCosting() {
-  const pass = prompt("Enter password");
-  if (pass !== EDIT_PASSWORD) {
+  const pwd = prompt("Enter Password");
+  if (pwd !== EDIT_PASSWORD) {
     alert("Access Denied");
     return;
   }
-  document.getElementById("editBox").classList.remove("hidden");
+  showEditBox();
 }
 
 function applyEdit() {
@@ -126,20 +107,39 @@ function applyEdit() {
   if (newRate > 0) rate = newRate;
   if (newPlc >= 0) plcRate = newPlc;
 
-  document.getElementById("editBox").classList.add("hidden");
-  calculate();
+  calculateAll();
+  hideEditBox(); // 🔒 AUTO-HIDE AFTER APPLY
 }
 
 /* ================================
-   PRINT / DOWNLOAD SAFETY
+   EDIT BOX VISIBILITY
+================================ */
+function hideEditBox() {
+  const box = document.getElementById("editBox");
+  if (box) box.classList.add("hidden");
+}
+
+function showEditBox() {
+  const box = document.getElementById("editBox");
+  if (box) box.classList.remove("hidden");
+}
+
+/* ================================
+   PRINT / PDF SAFETY
 ================================ */
 function beforeExport() {
-  document.getElementById("editBox").classList.add("hidden");
+  document.querySelector(".actions").style.display = "none";
+  hideEditBox();
+}
+
+function afterExport() {
+  document.querySelector(".actions").style.display = "flex";
 }
 
 function printCosting() {
   beforeExport();
   window.print();
+  setTimeout(afterExport, 500);
 }
 
 /* ================================
