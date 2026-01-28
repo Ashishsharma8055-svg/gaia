@@ -28,14 +28,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   unitNo = data.unit;
   area = Number(data.area || 0);
-  plcRate = Number(data.plc || 0);
 
   // Set static values
   document.getElementById("unitNo").innerText = unitNo;
   document.getElementById("size").innerText = area.toLocaleString();
 
-  calculate();
+  // 🔥 FETCH PLC LIVE FROM GOOGLE SHEET
+  fetchPLCFromSheet(unitNo);
 });
+
+/* ================================
+   FETCH PLC FROM GOOGLE SHEET
+================================ */
+function fetchPLCFromSheet(unitNo) {
+  fetch(API + "?action=getPLC&unit=" + encodeURIComponent(unitNo))
+    .then(res => res.text())
+    .then(txt => {
+      console.log("PLC RAW RESPONSE:", txt);
+      const d = JSON.parse(txt);
+
+      if (d.success) {
+        plcRate = Number(d.plc || 0);
+      } else {
+        plcRate = 0;
+      }
+
+      calculate(); // calculate AFTER PLC arrives
+    })
+    .catch(err => {
+      console.error("PLC FETCH ERROR:", err);
+      plcRate = 0;
+      calculate();
+    });
+}
 
 /* ================================
    MAIN CALCULATION
@@ -58,19 +83,18 @@ function calculate() {
   set("grandTotal", total);
 
   // Payment schedule
-  calculateSchedule(total, subTotal, gst);
+  calculateSchedule(total);
 }
 
 /* ================================
    PAYMENT SCHEDULE
 ================================ */
-function calculateSchedule(total, subTotal, gst) {
+function calculateSchedule(total) {
 
   set("booking", BOOKING_AMOUNT);
 
-  // Within 30 days:
-  // (10% of (Price + PLC) + GST) - Booking
-  const within30 =  (total* 0.10 ) - ( 2100000);
+  // Within 30 Days
+  const within30 = (total * 0.10) - BOOKING_AMOUNT;
   set("within30", within30);
 
   set("within60", total * 0.10);
@@ -80,7 +104,7 @@ function calculateSchedule(total, subTotal, gst) {
   set("appOC",    total * 0.25);
   set("recOC",    total * 0.10);
   set("possession", total * 0.05);
-  set("finalTotal", total*1.00);
+  set("finalTotal", total);
 }
 
 /* ================================
@@ -124,6 +148,5 @@ function printCosting() {
 function set(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
-
   el.innerText = "₹ " + Math.round(value).toLocaleString();
 }
