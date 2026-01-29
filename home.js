@@ -1,7 +1,7 @@
 const API = "https://script.google.com/macros/s/AKfycbwnF8m8kH2Nleb4fqvVAE0hYKpRIze-x71EDJPvrJiRtCZlVUXCBwhqetgMaMZJcX3eOg/exec";
 
 /* ================================
-   HOME PAGE SCRIPT (FINAL & STABLE)
+   HOME PAGE SCRIPT (FINAL + SORTING)
 ================================ */
 
 /* ================================
@@ -10,6 +10,15 @@ const API = "https://script.google.com/macros/s/AKfycbwnF8m8kH2Nleb4fqvVAE0hYKpR
 if (!localStorage.getItem("loggedIn")) {
   window.location.replace("index.html");
 }
+
+/* ================================
+   STATE
+================================ */
+let inventoryData = [];
+let sortState = {
+  column: null,
+  asc: true
+};
 
 /* ================================
    FETCH INVENTORY
@@ -53,32 +62,10 @@ function fetchData() {
         return;
       }
 
-      /* TABLE HEADER (PLC HIDDEN) */
-      table.innerHTML = `
-        <tr>
-          <th>Floor</th>
-          <th>Unit No</th>
-          <th>Area</th>
-          <th>Unit Type</th>
-          <th style="display:none">Total PLC</th>
-          <th>Action</th>
-        </tr>`;
+      inventoryData = d.data;
+      sortState = { column: null, asc: true };
 
-      d.data.forEach(r => {
-        table.innerHTML += `
-          <tr>
-            <td>${r[4]}</td>
-            <td>${r[0]}</td>
-            <td>${r[6]}</td>
-            <td>${r[7]}</td>
-            <td style="display:none">${Number(r[r.length - 1]) || 0}</td>
-            <td>
-              <button onclick='openCosting(${JSON.stringify(r)})'>
-                Costing
-              </button>
-            </td>
-          </tr>`;
-      });
+      renderTable(inventoryData);
     })
     .catch(err => {
       console.error("FETCH ERROR:", err);
@@ -93,6 +80,77 @@ function fetchData() {
 }
 
 /* ================================
+   RENDER TABLE
+================================ */
+function renderTable(data) {
+  const table = document.getElementById("table");
+
+  table.innerHTML = `
+    <tr>
+      <th onclick="sortBy(4)">Floor ⬍</th>
+      <th onclick="sortBy(0)">Unit No ⬍</th>
+      <th onclick="sortBy(6)">Area ⬍</th>
+      <th onclick="sortBy(7)">Unit Type ⬍</th>
+      <th style="display:none">Total PLC</th>
+      <th>Action</th>
+    </tr>`;
+
+  data.forEach(r => {
+    table.innerHTML += `
+      <tr>
+        <td>${r[4]}</td>
+        <td>${r[0]}</td>
+        <td>${r[6]}</td>
+        <td>${r[7]}</td>
+
+        <!-- Hidden PLC -->
+        <td style="display:none">${Number(r[r.length - 1]) || 0}</td>
+
+        <td>
+          <button onclick='openCosting(${JSON.stringify(r)})'>
+            Costing
+          </button>
+        </td>
+      </tr>`;
+  });
+}
+
+/* ================================
+   SORT FUNCTION
+================================ */
+function sortBy(colIndex) {
+  if (sortState.column === colIndex) {
+    sortState.asc = !sortState.asc;
+  } else {
+    sortState.column = colIndex;
+    sortState.asc = true;
+  }
+
+  inventoryData.sort((a, b) => {
+    let v1 = a[colIndex];
+    let v2 = b[colIndex];
+
+    // numeric sort if possible
+    const n1 = Number(v1);
+    const n2 = Number(v2);
+
+    if (!isNaN(n1) && !isNaN(n2)) {
+      return sortState.asc ? n1 - n2 : n2 - n1;
+    }
+
+    // string sort
+    v1 = String(v1).toLowerCase();
+    v2 = String(v2).toLowerCase();
+
+    if (v1 < v2) return sortState.asc ? -1 : 1;
+    if (v1 > v2) return sortState.asc ? 1 : -1;
+    return 0;
+  });
+
+  renderTable(inventoryData);
+}
+
+/* ================================
    COSTING REDIRECT
 ================================ */
 function openCosting(r) {
@@ -101,7 +159,7 @@ function openCosting(r) {
     JSON.stringify({
       unit: r[0],
       area: Number(r[6]) || 0,
-      plc: Number(r[r.length - 1]) || 0 // ✅ GUARANTEED PLC
+      plc: Number(r[r.length - 1]) || 0
     })
   );
 
@@ -117,18 +175,15 @@ function logout() {
 }
 
 /* ================================
-   DOM READY BINDINGS (CRITICAL)
+   DOM READY
 ================================ */
 document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("searchBtn")
+  document.getElementById("searchBtn")
     .addEventListener("click", fetchData);
 
-  document
-    .getElementById("logoutBtn")
+  document.getElementById("logoutBtn")
     .addEventListener("click", logout);
 
-  // Floor range live update
   const fromEl = document.getElementById("from");
   const toEl = document.getElementById("to");
   const fVal = document.getElementById("fVal");
