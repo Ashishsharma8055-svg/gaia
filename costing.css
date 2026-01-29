@@ -9,6 +9,7 @@
   background:#f4f6f9;
 }
 
+/* SCREEN VIEW */
 .cost-card{
   background:#fff9cc;
   padding:25px;
@@ -35,7 +36,7 @@
 }
 
 /* ================================
-   FIRST COST TABLE (JUSTIFIED)
+   TABLES
 ================================ */
 
 .cost-table{
@@ -52,32 +53,33 @@
   font-size:14px;
 }
 
-/* Header row */
+/* Prevent row cutting across pages */
+.cost-table tr{
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
 .cost-table th{
   background:#fff2cc;
   text-align:center;
 }
 
-/* Description column */
 .cost-table td:first-child{
   text-align:left;
   width:50%;
 }
 
-/* Rate column */
 .cost-table td:nth-child(2){
   text-align:center;
   width:20%;
 }
 
-/* Amount column */
 .cost-table td:nth-child(3){
   text-align:right;
   width:30%;
   font-weight:600;
 }
 
-/* TOTAL ROW */
 .cost-table .total td{
   background:#b6d7a8;
   font-weight:700;
@@ -85,23 +87,7 @@
 }
 
 /* ================================
-   PAYMENT SCHEDULE TABLE
-================================ */
-
-.cost-table + h3{
-  margin-top:30px;
-}
-
-.cost-table tr td:nth-child(2){
-  text-align:center;
-}
-
-.cost-table tr td:nth-child(3){
-  text-align:right;
-}
-
-/* ================================
-   ACTION BUTTONS
+   ACTIONS
 ================================ */
 
 .actions{
@@ -159,4 +145,58 @@
   font-size:13px;
   text-align:center;
   font-weight:600;
+}
+
+/* ================================
+   PDF MODE (A4 SAFE, NO CROPPING)
+================================ */
+
+body.pdf-mode{
+  background:#fff;
+}
+
+body.pdf-mode .costing-bg{
+  padding:0 !important;
+}
+
+body.pdf-mode .cost-card{
+  width:210mm !important;
+  max-width:210mm !important;
+  min-height:auto !important;
+  padding:10mm !important;
+  margin:0 auto !important;
+  border:none !important;
+  box-sizing:border-box;
+}
+
+/* Allow natural vertical flow */
+body.pdf-mode .cost-table{
+  page-break-after:auto;
+}
+
+/* Hide controls */
+body.pdf-mode .actions,
+body.pdf-mode .edit-box{
+  display:none !important;
+}
+
+/* ================================
+   PRINT RULES (MATCH PDF)
+================================ */
+
+@page{
+  size:A4 portrait;
+  margin:10mm;
+}
+
+@media print{
+  body{
+    width:210mm;
+    background:#fff;
+  }
+
+  .actions,
+  .edit-box{
+    display:none !important;
+  }
 }
