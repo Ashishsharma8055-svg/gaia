@@ -1,5 +1,5 @@
 /* ================================
-   COSTING PAGE SCRIPT (FINAL UX)
+   COSTING PAGE SCRIPT (FINAL LOCKED UX)
 ================================ */
 
 if (!localStorage.getItem("loggedIn")) {
@@ -31,23 +31,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const data = JSON.parse(saved);
 
-  unitNo = data.unit;
-  area = Number(data.area) || 0;
+  unitNo  = data.unit;
+  area    = Number(data.area) || 0;
   plcRate = Number(data.plc) || 0;
 
   document.getElementById("unitNo").innerText = unitNo;
-  document.getElementById("size").innerText = area.toLocaleString();
+  document.getElementById("size").innerText  = area.toLocaleString();
 
-  // 🔒 HIDE EDIT BOX ON LOAD
-  hideEditBox();
+  /* 🔒 HARD FORCE HIDE (DOM LEVEL) */
+  const editBox = document.getElementById("editBox");
+  if (editBox) {
+    editBox.style.display = "none";
+    editBox.classList.add("hidden");
+  }
 
   calculateAll();
 });
 
 /* ================================
-   MASTER CALCULATION
+   CALCULATION
 ================================ */
-function calculateAll() {
+function calculateAll(){
 
   const baseValue = rate * area;
   const plcValue  = plcRate * area;
@@ -64,18 +68,18 @@ function calculateAll() {
   set("gstValue", gstValue);
   set("grandTotal", total);
 
-  calculateSchedule(subTotal, gstValue, total);
+  calculateSchedule(subTotal, total);
 }
 
 /* ================================
    PAYMENT SCHEDULE
 ================================ */
-function calculateSchedule(subTotal, gst, total) {
+function calculateSchedule(subTotal, total){
 
   set("booking", BOOKING_AMOUNT);
 
-  const tenPercent = subTotal * 0.10;
-  const within30 = (tenPercent + (tenPercent * GST_RATE)) - BOOKING_AMOUNT;
+  const ten = subTotal * 0.10;
+  const within30 = (ten + (ten * GST_RATE)) - BOOKING_AMOUNT;
 
   set("within30", within30);
   set("within60", total * 0.10);
@@ -89,64 +93,139 @@ function calculateSchedule(subTotal, gst, total) {
 }
 
 /* ================================
-   EDIT FLOW (FIXED UX)
+   EDIT FLOW (MASKED PASSWORD)
 ================================ */
-function editCosting() {
-  const pwd = prompt("Enter Password");
-  if (pwd !== EDIT_PASSWORD) {
-    alert("Access Denied");
-    return;
-  }
-  showEditBox();
+function editCosting(){
+  showPasswordModal();
 }
 
-function applyEdit() {
-  const newRate = Number(document.getElementById("newRate").value);
-  const newPlc  = Number(document.getElementById("newPlc").value);
+function applyEdit(){
+  const r = Number(newRate.value);
+  const p = Number(newPlc.value);
 
-  if (newRate > 0) rate = newRate;
-  if (newPlc >= 0) plcRate = newPlc;
+  if (r > 0) rate = r;
+  if (p >= 0) plcRate = p;
 
   calculateAll();
-  hideEditBox(); // 🔒 AUTO-HIDE AFTER APPLY
-}
-
-/* ================================
-   EDIT BOX VISIBILITY
-================================ */
-function hideEditBox() {
-  const box = document.getElementById("editBox");
-  if (box) box.classList.add("hidden");
-}
-
-function showEditBox() {
-  const box = document.getElementById("editBox");
-  if (box) box.classList.remove("hidden");
-}
-
-/* ================================
-   PRINT / PDF SAFETY
-================================ */
-function beforeExport() {
-  document.querySelector(".actions").style.display = "none";
   hideEditBox();
 }
 
-function afterExport() {
-  document.querySelector(".actions").style.display = "flex";
+/* ================================
+   EDIT BOX CONTROL
+================================ */
+function hideEditBox(){
+  const box = document.getElementById("editBox");
+  if (box) {
+    box.style.display = "none";
+    box.classList.add("hidden");
+  }
 }
 
-function printCosting() {
+function showEditBox(){
+  const box = document.getElementById("editBox");
+  if (box) {
+    box.style.display = "flex";
+    box.classList.remove("hidden");
+  }
+}
+
+/* ================================
+   MASKED PASSWORD MODAL (SECURE)
+================================ */
+function showPasswordModal(){
+
+  if (document.getElementById("pwdOverlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "pwdOverlay";
+  overlay.style = `
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+  `;
+
+  overlay.innerHTML = `
+    <div style="
+      background:#fff;
+      padding:20px;
+      border-radius:10px;
+      min-width:260px;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.3)
+    ">
+      <h3 style="margin:0 0 10px">Enter Password</h3>
+      <input id="pwdInput" type="password"
+        style="width:100%;padding:10px;margin-bottom:10px"
+        placeholder="••••">
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button onclick="validatePassword()">Submit</button>
+        <button onclick="closePasswordModal()">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.getElementById("pwdInput").focus();
+}
+
+function validatePassword(){
+  const val = document.getElementById("pwdInput").value;
+  if (val !== EDIT_PASSWORD){
+    alert("Invalid Password");
+    return;
+  }
+  closePasswordModal();
+  showEditBox();
+}
+
+function closePasswordModal(){
+  const o = document.getElementById("pwdOverlay");
+  if (o) o.remove();
+}
+
+/* ================================
+   PDF / PRINT
+================================ */
+function beforeExport(){
+  document.body.classList.add("pdf-mode");
+}
+
+function afterExport(){
+  document.body.classList.remove("pdf-mode");
+}
+
+function printCosting(){
   beforeExport();
   window.print();
-  setTimeout(afterExport, 500);
+  setTimeout(afterExport, 800);
+}
+
+function downloadPDF(){
+
+  beforeExport();
+
+  const el = document.getElementById("costingSheet");
+
+  const opt = {
+    margin:0,
+    filename:`Costing_${unitNo}.pdf`,
+    image:{ type:"jpeg", quality:1 },
+    html2canvas:{ scale:3, useCORS:true },
+    jsPDF:{ unit:"mm", format:"a4", orientation:"portrait" },
+    pagebreak:{ mode:["avoid-all"] }
+  };
+
+  html2pdf().set(opt).from(el).save().then(afterExport);
 }
 
 /* ================================
    UTIL
 ================================ */
-function set(id, value) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.innerText = "₹ " + Math.round(value).toLocaleString();
+function set(id,val){
+  document.getElementById(id).innerText =
+    "₹ " + Math.round(val).toLocaleString();
 }
