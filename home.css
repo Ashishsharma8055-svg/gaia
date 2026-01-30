@@ -1,0 +1,205 @@
+/* ================================
+   FILTER TILES
+================================ */
+.filter-tiles{
+  margin:16px;
+  padding:16px;
+  border-radius:16px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  align-items:end;
+}
+
+/* GLASS */
+.glass{
+  background:rgba(255,255,255,0.2);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 10px 32px rgba(0,0,0,.25);
+}
+
+/* TILE */
+.tile{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.tile label{
+  font-size:12px;
+  font-weight:600;
+  color:#111827;
+}
+
+.tile input,
+.tile select{
+  height:40px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  font-size:14px;
+}
+
+/* UNIT PILLS */
+.unit-pills{
+  display:flex;
+  gap:6px;
+}
+
+.unit-pills label{
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #cbd5f5;
+  background:#eef2ff;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.unit-pills input{
+  display:none;
+}
+
+/* RANGE */
+.range-row{
+  position:relative;
+  height:28px;
+}
+.range-row input{
+  position:absolute;
+  width:100%;
+  pointer-events:none;
+}
+.range-row input::-webkit-slider-thumb{
+  pointer-events:auto;
+  width:16px;
+  height:16px;
+  background:#2563eb;
+  border-radius:50%;
+}
+
+.range-values{
+  font-size:12px;
+  text-align:center;
+}
+
+/* SEARCH BUTTON */
+.tile.action button{
+  height:40px;
+  border:none;
+  border-radius:12px;
+  background:#2563eb;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* ================================
+   TABLE
+================================ */
+.result-table{
+  width:95%;
+  margin:20px auto;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.result-table th{
+  background:#f1f5f9;
+  padding:12px;
+  cursor:pointer;
+}
+
+.result-table td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media(max-width:900px){
+  .filter-tiles{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:520px){
+  .filter-tiles{
+    grid-template-columns:1fr;
+  }
+}
+/* ================================
+   FLOOR RANGE ACTIVE COLOR
+================================ */
+.range-row input[type=range]{
+  background:linear-gradient(
+    to right,
+    #2563eb 0%,
+    #2563eb var(--range-fill, 100%),
+    #d1d5db var(--range-fill, 100%)
+  );
+}
+
+/* ================================
+   UNIT PILL ACTIVE STATE
+================================ */
+.unit-pills label.active{
+  background:#2563eb;
+  color:#fff;
+  border-color:#2563eb;
+}
+/* ================================
+   PASSWORD MODAL (FIX)
+================================ */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.modal.hidden{
+  display:none;
+}
+
+.modal-box{
+  background:#fff;
+  padding:22px;
+  border-radius:14px;
+  width:320px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  animation:pop .25s ease-out;
+}
+
+.modal-box h3{
+  margin:0 0 12px;
+  font-size:18px;
+}
+
+.modal-box input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  font-size:14px;
+}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:12px;
+}
+
+@keyframes pop{
+  from{ transform:scale(.9); opacity:0 }
+  to{ transform:scale(1); opacity:1 }
+}
