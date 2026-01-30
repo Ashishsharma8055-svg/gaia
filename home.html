@@ -5,50 +5,69 @@
 <title>Inventory Dashboard</title>
 
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="home.css">
 <script src="home.js" defer></script>
 </head>
 
 <body>
 
 <header class="topbar">
-  <div class="brand">Real Estate Inventory</div>
-  <button id="logoutBtn">Logout</button>
+  <div class="brand">
+    Welcome — <span id="userName"></span>
+  </div>
+
+  <div class="top-actions">
+    <button class="ghost" onclick="openPasswordModal()">Change Password</button>
+    <button onclick="logout()">Logout</button>
+  </div>
 </header>
 
-<section class="filter-card">
+<!-- FILTER TILES -->
+<section class="filter-tiles glass">
 
-  <!-- Tower -->
-  <div class="field">
+  <!-- TILE 1 -->
+  <div class="tile">
     <label>Tower</label>
     <select id="tower">
-      <option value="">Select Tower</option>
+      <option value="">All</option>
       <option>T2</option><option>T3</option>
       <option>T4</option><option>T5</option><option>T6</option>
     </select>
   </div>
 
-  <!-- Unit Allocation -->
-  <div class="field">
+  <!-- TILE 2 -->
+  <div class="tile">
     <label>Unit Allocation</label>
-    <div class="checkbox-row">
-      <label><input type="checkbox" class="unitChk" value="1"> Unit 1</label>
-      <label><input type="checkbox" class="unitChk" value="2"> Unit 2</label>
-      <label><input type="checkbox" class="unitChk" value="3"> Unit 3</label>
-      <label><input type="checkbox" class="unitChk" value="4"> Unit 4</label>
+    <div class="unit-pills">
+      <label><input type="checkbox" class="unitChk" value="1">1</label>
+      <label><input type="checkbox" class="unitChk" value="2">2</label>
+      <label><input type="checkbox" class="unitChk" value="3">3</label>
+      <label><input type="checkbox" class="unitChk" value="4">4</label>
     </div>
   </div>
 
-  <!-- Floor Slider -->
-  <div class="field">
+  <!-- TILE 3 -->
+  <div class="tile">
     <label>Floor Range</label>
-    <input type="range" id="from" min="1" max="46" value="1">
-    <input type="range" id="to" min="1" max="46" value="46">
-    <div class="range-text">
-      <span id="fVal">1</span> – <span id="tVal">46</span>
+    <div class="range-row">
+      <input type="range" id="minFloor" min="1" max="46" value="1">
+      <input type="range" id="maxFloor" min="1" max="46" value="46">
+    </div>
+    <div class="range-values">
+      <span id="minVal">1</span> – <span id="maxVal">46</span>
     </div>
   </div>
 
-  <button class="primary" id="searchBtn">Search</button>
+  <!-- TILE 4 -->
+  <div class="tile">
+    <label>Search Unit</label>
+    <input id="unitSearch" placeholder="Unit No">
+  </div>
+
+  <!-- SEARCH -->
+  <div class="tile action">
+    <button id="searchBtn">Search</button>
+  </div>
 
 </section>
 
@@ -56,7 +75,18 @@
 
 <table class="result-table" id="table"></table>
 
-<footer>© Inventory Management System</footer>
+<!-- PASSWORD MODAL -->
+<div id="pwdModal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Change Password</h3>
+    <input type="password" id="oldPwd" placeholder="Old Password">
+    <input type="password" id="newPwd" placeholder="New Password">
+    <div class="modal-actions">
+      <button onclick="submitPasswordChange()">Update</button>
+      <button class="ghost" onclick="closePasswordModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
