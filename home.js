@@ -1,12 +1,6 @@
-const API = "https://script.google.com/macros/s/AKfycbwnF8m8kH2Nleb4fqvVAE0hYKpRIze-x71EDJPvrJiRtCZlVUXCBwhqetgMaMZJcX3eOg/exec";
+const API =
+  "https://script.google.com/macros/s/AKfycbxck_curiwztnaMrGdsWpks9wx1ViwNztcYAG6r68ZS_8cKOOgpVF6iN5dIeCr8B6VLSw/exec";
 
-/* ================================
-   HOME PAGE SCRIPT (FINAL + SORTING)
-================================ */
-
-/* ================================
-   SESSION GUARD
-================================ */
 if (!localStorage.getItem("loggedIn")) {
   window.location.replace("index.html");
 }
@@ -15,85 +9,161 @@ if (!localStorage.getItem("loggedIn")) {
    STATE
 ================================ */
 let inventoryData = [];
-let sortState = {
-  column: null,
-  asc: true
-};
+let filteredData = [];
+let sortState = { col: null, asc: true };
+
+/* ================================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ELEMENTS */
+  const loader = document.getElementById("loader");
+  const table = document.getElementById("table");
+  const tower = document.getElementById("tower");
+  const minFloor = document.getElementById("minFloor");
+  const maxFloor = document.getElementById("maxFloor");
+  const minVal = document.getElementById("minVal");
+  const maxVal = document.getElementById("maxVal");
+  const unitSearch = document.getElementById("unitSearch");
+  const searchBtn = document.getElementById("searchBtn");
+  const pwdModal = document.getElementById("pwdModal");
+
+ /* userName.innerText = localStorage.getItem("username");*/
+  userName.innerText = (localStorage.getItem("username") || "").toUpperCase();
+
+  /* ================================
+     UNIT PILLS (FIXED)
+  ================================ */
+  document.querySelectorAll(".unit-pills label").forEach(label => {
+    const chk = label.querySelector("input");
+    label.addEventListener("click", e => {
+      e.preventDefault();
+      chk.checked = !chk.checked;
+      label.classList.toggle("active", chk.checked);
+    });
+  });
+
+  /* ================================
+     FLOOR RANGE
+  ================================ */
+  function updateRange() {
+    if (+minFloor.value > +maxFloor.value)
+      minFloor.value = maxFloor.value;
+
+    if (+maxFloor.value < +minFloor.value)
+      maxFloor.value = minFloor.value;
+
+    minVal.innerText = minFloor.value;
+    maxVal.innerText = maxFloor.value;
+  }
+
+  minFloor.addEventListener("input", updateRange);
+  maxFloor.addEventListener("input", updateRange);
+  updateRange();
+
+  /* ================================
+     SEARCH
+  ================================ */
+  searchBtn.addEventListener("click", fetchData);
+
+  unitSearch.addEventListener("input", () => {
+    filteredData = inventoryData.filter(r =>
+      String(r[0]).toLowerCase().includes(unitSearch.value.toLowerCase())
+    );
+    renderTable(filteredData);
+  });
+
+  /* ================================
+     PASSWORD MODAL
+  ================================ */
+  window.openPasswordModal = () => pwdModal.classList.remove("hidden");
+  window.closePasswordModal = () => pwdModal.classList.add("hidden");
+
+  window.submitPasswordChange = () => {
+    fetch(API + "?action=changePassword", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        username: localStorage.getItem("username"),
+        oldPassword: oldPwd.value,
+        newPassword: newPwd.value
+      })
+    })
+    .then(r => r.json())
+    .then(d => {
+      alert(d.success ? "Password updated successfully" : d.message);
+      if (d.success) closePasswordModal();
+    });
+  };
+
+  window.logout = () => {
+    localStorage.clear();
+    window.location.href = "index.html";
+  };
+});
 
 /* ================================
    FETCH INVENTORY
 ================================ */
 function fetchData() {
-  const loader = document.getElementById("loader");
-  const table = document.getElementById("table");
-
-  const towerEl = document.getElementById("tower");
-  const fromEl = document.getElementById("from");
-  const toEl = document.getElementById("to");
 
   loader.classList.remove("hidden");
   table.innerHTML = "";
 
-  const units = Array.from(
-    document.querySelectorAll(".unitChk:checked")
-  ).map(u => u.value);
+  const units =
+    [...document.querySelectorAll(".unitChk:checked")].map(x => x.value);
 
   fetch(API + "?action=fetch", {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({
-      tower: towerEl.value || "",
+      tower: tower.value || "",
       units: units,
-      from: Number(fromEl.value),
-      to: Number(toEl.value)
+      from: Number(minFloor.value),
+      to: Number(maxFloor.value)
     })
   })
-    .then(res => res.json())
-    .then(d => {
-      loader.classList.add("hidden");
+  .then(r => r.json())
+  .then(d => {
 
-      if (!d.success || !Array.isArray(d.data) || d.data.length === 0) {
-        table.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align:center">
-              No matching available units found
-            </td>
-          </tr>`;
-        return;
-      }
+    loader.classList.add("hidden");
 
-      inventoryData = d.data;
-      sortState = { column: null, asc: true };
+    if (!d.success) {
+      showMessage("⚠️ Error loading data. Please retry.");
+      return;
+    }
 
-      renderTable(inventoryData);
-    })
-    .catch(err => {
-      console.error("FETCH ERROR:", err);
-      loader.classList.add("hidden");
-      table.innerHTML = `
-        <tr>
-          <td colspan="6" style="text-align:center">
-            Error loading data
-          </td>
-        </tr>`;
-    });
+    if (!Array.isArray(d.data) || d.data.length === 0) {
+      showMessage("No data available for selected filters.");
+      return;
+    }
+
+    inventoryData = d.data;
+    filteredData = d.data;
+    renderTable(filteredData);
+  })
+  .catch(err => {
+    console.error(err);
+    loader.classList.add("hidden");
+    showMessage("⚠️ Server error. Please refresh.");
+  });
 }
 
 /* ================================
-   RENDER TABLE
+   TABLE + SORTING
 ================================ */
 function renderTable(data) {
-  const table = document.getElementById("table");
 
   table.innerHTML = `
     <tr>
       <th onclick="sortBy(4)">Floor ⬍</th>
-      <th onclick="sortBy(0)">Unit No ⬍</th>
+      <th onclick="sortBy(0)">Unit ⬍</th>
       <th onclick="sortBy(6)">Area ⬍</th>
-      <th onclick="sortBy(7)">Unit Type ⬍</th>
-      <th style="display:none">Total PLC</th>
+      <th onclick="sortBy(7)">Type ⬍</th>
       <th>Action</th>
-    </tr>`;
+    </tr>
+  `;
 
   data.forEach(r => {
     table.innerHTML += `
@@ -102,93 +172,61 @@ function renderTable(data) {
         <td>${r[0]}</td>
         <td>${r[6]}</td>
         <td>${r[7]}</td>
-
-        <!-- Hidden PLC -->
-        <td style="display:none">${Number(r[r.length - 1]) || 0}</td>
-
         <td>
           <button onclick='openCosting(${JSON.stringify(r)})'>
             Costing
           </button>
         </td>
-      </tr>`;
+      </tr>
+    `;
   });
 }
 
-/* ================================
-   SORT FUNCTION
-================================ */
-function sortBy(colIndex) {
-  if (sortState.column === colIndex) {
-    sortState.asc = !sortState.asc;
-  } else {
-    sortState.column = colIndex;
-    sortState.asc = true;
-  }
+function sortBy(col) {
+  sortState.asc = sortState.col === col ? !sortState.asc : true;
+  sortState.col = col;
 
-  inventoryData.sort((a, b) => {
-    let v1 = a[colIndex];
-    let v2 = b[colIndex];
+  filteredData.sort((a, b) => {
+    const x = a[col], y = b[col];
+    const nx = Number(x), ny = Number(y);
 
-    // numeric sort if possible
-    const n1 = Number(v1);
-    const n2 = Number(v2);
+    if (!isNaN(nx) && !isNaN(ny))
+      return sortState.asc ? nx - ny : ny - nx;
 
-    if (!isNaN(n1) && !isNaN(n2)) {
-      return sortState.asc ? n1 - n2 : n2 - n1;
-    }
-
-    // string sort
-    v1 = String(v1).toLowerCase();
-    v2 = String(v2).toLowerCase();
-
-    if (v1 < v2) return sortState.asc ? -1 : 1;
-    if (v1 > v2) return sortState.asc ? 1 : -1;
-    return 0;
+    return sortState.asc
+      ? String(x).localeCompare(String(y))
+      : String(y).localeCompare(String(x));
   });
 
-  renderTable(inventoryData);
+  renderTable(filteredData);
+}
+
+/* ================================
+   MESSAGE
+================================ */
+function showMessage(msg) {
+  table.innerHTML = `
+    <tr>
+      <td colspan="5" style="
+        padding:24px;
+        text-align:center;
+        font-weight:500;
+        color:#6b7280;
+      ">
+        ${msg}
+      </td>
+    </tr>
+  `;
 }
 
 /* ================================
    COSTING REDIRECT
 ================================ */
 function openCosting(r) {
-  localStorage.setItem(
-    "costing",
-    JSON.stringify({
-      unit: r[0],
-      area: Number(r[6]) || 0,
-      plc: Number(r[r.length - 1]) || 0
-    })
-  );
-
+  localStorage.setItem("costing", JSON.stringify({
+    unit: r[0],
+    area: Number(r[6]) || 0,
+    plc: Number(r[r.length - 1]) || 0
+  }));
   window.location.href = "costing.html";
 }
-
-/* ================================
-   LOGOUT
-================================ */
-function logout() {
-  localStorage.removeItem("loggedIn");
-  window.location.href = "index.html";
-}
-
-/* ================================
-   DOM READY
-================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("searchBtn")
-    .addEventListener("click", fetchData);
-
-  document.getElementById("logoutBtn")
-    .addEventListener("click", logout);
-
-  const fromEl = document.getElementById("from");
-  const toEl = document.getElementById("to");
-  const fVal = document.getElementById("fVal");
-  const tVal = document.getElementById("tVal");
-
-  fromEl.addEventListener("input", () => (fVal.innerText = fromEl.value));
-  toEl.addEventListener("input", () => (tVal.innerText = toEl.value));
-});
