@@ -1,7 +1,7 @@
 /* ================================
    CONFIG
 ================================ */
-const API = "https://script.google.com/macros/s/AKfycbwnF8m8kH2Nleb4fqvVAE0hYKpRIze-x71EDJPvrJiRtCZlVUXCBwhqetgMaMZJcX3eOg/exec";
+const API = "https://script.google.com/macros/s/AKfycbxck_curiwztnaMrGdsWpks9wx1ViwNztcYAG6r68ZS_8cKOOgpVF6iN5dIeCr8B6VLSw/exec";
 
 /* ================================
    LOGIN FUNCTION
@@ -35,7 +35,10 @@ function login() {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        localStorage.setItem("loggedIn", "1");
+        /* ✅ REQUIRED UPDATE (ONLY THIS PART ADDED) */
+        localStorage.setItem("username", username);
+        localStorage.setItem("loggedIn", "true");
+
         window.location.href = "home.html";
       } else {
         msgEl.innerText = "Invalid username or password";
