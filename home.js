@@ -161,6 +161,7 @@ function renderTable(data) {
       <th onclick="sortBy(0)">Unit ⬍</th>
       <th onclick="sortBy(6)">Area ⬍</th>
       <th onclick="sortBy(7)">Type ⬍</th>
+      <th onclick="sortBy(14)">PLC ⬍</th>
       <th>Action</th>
     </tr>
   `;
@@ -172,6 +173,7 @@ function renderTable(data) {
         <td>${r[0]}</td>
         <td>${r[6]}</td>
         <td>${r[7]}</td>
+        <td>${r[14]}</td>
         <td>
           <button onclick='openCosting(${JSON.stringify(r)})'>
             Costing
